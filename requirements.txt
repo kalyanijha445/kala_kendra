@@ -1,3 +1,5 @@
 Werkzeug
 Flask
+cloudinary
 gunicorn
+
