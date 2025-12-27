@@ -64,7 +64,13 @@
             flex-shrink: 0; border: 1px solid #f0f0f0;
         }
 
-        .card-view-trigger { width: 100%; height: 100%; display: block; overflow: hidden; }
+        .card-view-trigger { 
+            width: 100%; height: 100%; display: block; overflow: hidden; 
+            /* Prevent default context menu on long press so we can show our own button */
+            -webkit-touch-callout: none;
+            -webkit-user-select: none; 
+            user-select: none;
+        }
 
         .art-card img {
             width: 100%; height: 100%; object-fit: cover;
@@ -181,7 +187,7 @@
             transform: translateY(20px) scale(0.98); 
             transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
             position: relative;
-            /* FIXED: Ensures internal content respects border-radius at bottom */
+            /* Ensures internal content respects border-radius at bottom */
             overflow: hidden; 
         }
         .modal-overlay.active .form-card { transform: translateY(0) scale(1); }
@@ -296,6 +302,76 @@
         .lightbox-close { top: 30px; right: 40px; color: #333; font-size: 2.5rem; position: absolute; cursor:pointer; background:none; border:none; z-index:2000; }
         .empty-wall { position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); text-align: center; opacity: 0.4; }
 
+
+        /* --- 7. MOBILE RESPONSIVE TWEAKS --- */
+        @media screen and (max-width: 768px) {
+            /* RE-ORGANIZE NAVBAR: 2-Row Layout */
+            .navbar {
+                display: grid;
+                grid-template-columns: 1fr auto;
+                grid-template-rows: auto auto;
+                gap: 15px 0;
+                padding: 15px 20px;
+                top: 10px;
+                width: 94%;
+            }
+            
+            /* Left: Brand info (Top-Left) */
+            .nav-left { grid-column: 1; grid-row: 1; }
+            
+            /* Right: User Icon (Top-Right) */
+            .nav-right { grid-column: 2; grid-row: 1; align-self: center; justify-self: end; }
+            .user-menu-btn { width: 40px; height: 40px; }
+
+            /* Center: Event Info (Bottom Row, Full Width) */
+            .nav-center { 
+                grid-column: 1 / -1; 
+                grid-row: 2; 
+                text-align: left;
+                padding-top: 12px;
+                border-top: 1px solid #f2f2f2;
+                margin-top: 5px;
+            }
+            
+            /* Scale Down Typography */
+            .txt-brand-heading { font-size: 0.95rem; }
+            .txt-brand-sub { font-size: 0.65rem; }
+            .txt-brand-address { font-size: 0.6rem; max-width: 100%; white-space: normal; line-height: 1.3; margin-top: 3px; }
+            
+            .txt-event-main { font-size: 0.9rem; }
+            .txt-event-date { font-size: 0.7rem; }
+
+            /* Fix Viewport Spacing due to taller navbar */
+            .gallery-viewport { 
+                padding-top: 200px; /* Clears the new stacked navbar */
+                gap: 15px; 
+            }
+            
+            /* Compact Cards for mobile */
+            .art-card { height: 140px; min-width: 105px; padding: 6px; }
+            
+            /* Delete button HIDDEN initially on mobile */
+            .delete-btn-card { 
+                opacity: 0; pointer-events: none;
+                top: -8px; right: -8px;
+                transition: opacity 0.2s, transform 0.2s;
+            }
+            
+            /* Visible when 'show-mobile' class is added via long-press */
+            .delete-btn-card.show-mobile {
+                opacity: 1; 
+                pointer-events: auto;
+                transform: scale(0.9);
+            }
+
+            /* Dropdown Alignment */
+            .menu-dropdown { top: 50px; right: -5px; width: 190px; }
+            
+            /* Mobile Lightbox */
+            .lightbox-img-frame { border-width: 5px; }
+            .lightbox-close { top: 10px; right: 10px; }
+        }
+
     </style>
 </head>
 <body>
@@ -337,11 +413,15 @@
             <div class="scroll-track move-right">
                 {% for photo in photos[0::4] %}
                     <div class="art-card" id="card-{{ photo[0] }}">
-                        <div class="card-view-trigger" role="button" tabindex="0" aria-label="View {{ photo[2] }}" 
+                        <div class="card-view-trigger" role="button" tabindex="0" 
+                             aria-label="View {{ photo[2] }}" 
                              data-filename="{{ photo[1] }}" 
                              data-name="{{ photo[2] }}" 
                              data-orientation="{{ photo[3] }}"
-                             onclick="viewArt(this)">
+                             onclick="viewArt(this)"
+                             ontouchstart="handleTouchStart(this)"
+                             ontouchend="handleTouchEnd(event)"
+                             ontouchmove="handleTouchCancel()">
                              <img src="{{ url_for('static', filename='uploads/' + photo[1]) }}" class="rot-{{ photo[3] }}" alt="Art" loading="lazy">
                         </div>
                         <button class="delete-btn-card" onclick="removeArt(this)" data-id="{{ photo[0] }}" aria-label="Delete">
@@ -354,7 +434,11 @@
             <div class="scroll-track move-left">
                 {% for photo in photos[1::4] %}
                     <div class="art-card" id="card-{{ photo[0] }}">
-                        <div class="card-view-trigger" role="button" tabindex="0" aria-label="View {{ photo[2] }}" data-filename="{{ photo[1] }}" data-name="{{ photo[2] }}" data-orientation="{{ photo[3] }}" onclick="viewArt(this)">
+                        <div class="card-view-trigger" role="button" tabindex="0" aria-label="View {{ photo[2] }}" data-filename="{{ photo[1] }}" data-name="{{ photo[2] }}" data-orientation="{{ photo[3] }}" 
+                             onclick="viewArt(this)"
+                             ontouchstart="handleTouchStart(this)"
+                             ontouchend="handleTouchEnd(event)"
+                             ontouchmove="handleTouchCancel()">
                              <img src="{{ url_for('static', filename='uploads/' + photo[1]) }}" class="rot-{{ photo[3] }}" alt="Art" loading="lazy">
                         </div>
                         <button class="delete-btn-card" onclick="removeArt(this)" data-id="{{ photo[0] }}" aria-label="Delete">
@@ -367,7 +451,11 @@
             <div class="scroll-track move-right">
                 {% for photo in photos[2::4] %}
                     <div class="art-card" id="card-{{ photo[0] }}">
-                        <div class="card-view-trigger" role="button" tabindex="0" aria-label="View {{ photo[2] }}" data-filename="{{ photo[1] }}" data-name="{{ photo[2] }}" data-orientation="{{ photo[3] }}" onclick="viewArt(this)">
+                        <div class="card-view-trigger" role="button" tabindex="0" aria-label="View {{ photo[2] }}" data-filename="{{ photo[1] }}" data-name="{{ photo[2] }}" data-orientation="{{ photo[3] }}" 
+                             onclick="viewArt(this)"
+                             ontouchstart="handleTouchStart(this)"
+                             ontouchend="handleTouchEnd(event)"
+                             ontouchmove="handleTouchCancel()">
                              <img src="{{ url_for('static', filename='uploads/' + photo[1]) }}" class="rot-{{ photo[3] }}" alt="Art" loading="lazy">
                         </div>
                         <button class="delete-btn-card" onclick="removeArt(this)" data-id="{{ photo[0] }}" aria-label="Delete">
@@ -380,7 +468,11 @@
             <div class="scroll-track move-left">
                 {% for photo in photos[3::4] %}
                     <div class="art-card" id="card-{{ photo[0] }}">
-                        <div class="card-view-trigger" role="button" tabindex="0" aria-label="View {{ photo[2] }}" data-filename="{{ photo[1] }}" data-name="{{ photo[2] }}" data-orientation="{{ photo[3] }}" onclick="viewArt(this)">
+                        <div class="card-view-trigger" role="button" tabindex="0" aria-label="View {{ photo[2] }}" data-filename="{{ photo[1] }}" data-name="{{ photo[2] }}" data-orientation="{{ photo[3] }}" 
+                             onclick="viewArt(this)"
+                             ontouchstart="handleTouchStart(this)"
+                             ontouchend="handleTouchEnd(event)"
+                             ontouchmove="handleTouchCancel()">
                              <img src="{{ url_for('static', filename='uploads/' + photo[1]) }}" class="rot-{{ photo[3] }}" alt="Art" loading="lazy">
                         </div>
                         <button class="delete-btn-card" onclick="removeArt(this)" data-id="{{ photo[0] }}" aria-label="Delete">
@@ -532,6 +624,34 @@
             card.style.transform = "scale(0) opacity(0)";
             fetch('/delete/' + id, { method: 'POST' }).then(r => r.json()).then(data => { if(data.status === 'success') setTimeout(() => card.remove(), 400); });
         }
+        
+        // --- LONG PRESS TO SHOW DELETE BUTTON (Mobile) ---
+        var longPressTimer;
+        var isLongPressActive = false;
+
+        function handleTouchStart(el) {
+            isLongPressActive = false;
+            longPressTimer = setTimeout(function() {
+                isLongPressActive = true;
+                var btn = el.parentElement.querySelector('.delete-btn-card');
+                if(btn) btn.classList.toggle('show-mobile'); // Toggle visibility on long press
+                if(navigator.vibrate) navigator.vibrate(40); // Haptic feedback
+            }, 600); // 600ms = long press duration
+        }
+
+        function handleTouchCancel() {
+            clearTimeout(longPressTimer);
+        }
+
+        function handleTouchEnd(e) {
+            clearTimeout(longPressTimer);
+            if(isLongPressActive) {
+                // If it was a long press, stop the "click" from happening (prevent lightbox)
+                e.preventDefault(); 
+                e.stopPropagation(); 
+            }
+        }
+
         document.addEventListener('keydown', (e) => { if(e.key === "Escape") { closeModal('uploadModal'); closeModal('lightbox'); } });
     </script>
 </body>
