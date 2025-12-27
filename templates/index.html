@@ -1,0 +1,538 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Kala Kendra - Art Portal</title>
+    <!-- Google Fonts: Poppins -->
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <!-- Remix Icons -->
+    <link href="https://cdn.jsdelivr.net/npm/remixicon@3.5.0/fonts/remixicon.css" rel="stylesheet">
+    
+    <style>
+        /* --- 1. RESET & VARIABLES --- */
+        :root {
+            --bg-color: #ffffff;
+            --gradient-start: #ffffff;
+            --gradient-end: #f8eaec;
+            --maroon-accent: #920f26;
+            --maroon-hover: #b91a38;
+            --text-main: #222;
+            --text-sub: #666;
+            --card-bg: rgba(255, 255, 255, 0.98); 
+            --border-light: #f0f0f0;
+            --shadow-card: 0 20px 60px -10px rgba(100, 10, 30, 0.15);
+            --radius-lg: 20px;
+            --radius-md: 12px;
+            --font: 'Poppins', sans-serif;
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        body {
+            font-family: var(--font);
+            background: linear-gradient(135deg, var(--gradient-start) 0%, var(--gradient-end) 100%);
+            color: var(--text-main);
+            height: 100vh;
+            width: 100vw;
+            overflow: hidden;
+        }
+
+        /* --- 2. MARQUEE LAYOUT --- */
+        .gallery-viewport {
+            width: 100vw; height: 100vh;
+            display: flex; flex-direction: column; justify-content: center;
+            overflow: hidden; gap: 20px; padding-top: 120px; 
+        }
+
+        .scroll-track { display: flex; width: max-content; gap: 20px; }
+
+        .move-right { animation: scrollRight 180s linear infinite; }
+        .move-left { animation: scrollLeft 180s linear infinite; }
+
+        @keyframes scrollLeft { 0% { transform: translateX(0); } 100% { transform: translateX(-50%); } }
+        @keyframes scrollRight { 0% { transform: translateX(-50%); } 100% { transform: translateX(0); } }
+        
+        .scroll-track:hover { animation-play-state: paused; }
+
+        /* --- 3. ART CARD (Minimalist Frame) --- */
+        .art-card {
+            position: relative; background: #fff; padding: 10px;
+            border-radius: 4px; box-shadow: 0 4px 20px rgba(0,0,0,0.06);
+            height: 180px; min-width: 130px; 
+            cursor: pointer; transition: all 0.4s cubic-bezier(0.2, 0.8, 0.2, 1); 
+            flex-shrink: 0; border: 1px solid #f0f0f0;
+        }
+
+        .card-view-trigger { width: 100%; height: 100%; display: block; overflow: hidden; }
+
+        .art-card img {
+            width: 100%; height: 100%; object-fit: cover;
+            transition: transform 0.6s ease; filter: grayscale(5%);
+        }
+
+        .art-card:hover { transform: translateY(-5px) scale(1.05); box-shadow: 0 15px 40px rgba(0,0,0,0.15); z-index: 10; border-color: #fff; }
+        .art-card:hover img { filter: grayscale(0%); }
+
+        .rot-0   { transform: rotate(0deg); }
+        .rot-90  { transform: rotate(90deg); }
+        .rot-180 { transform: rotate(180deg); }
+        .rot-270 { transform: rotate(270deg); }
+
+        .delete-btn-card {
+            position: absolute; top: -10px; right: -10px; width: 28px; height: 28px;
+            background: var(--maroon-accent); color: white; border: 3px solid white;
+            border-radius: 50%; display: flex; align-items: center; justify-content: center;
+            cursor: pointer; box-shadow: 0 4px 8px rgba(0,0,0,0.2); opacity: 0;
+            transform: scale(0.8); transition: 0.2s; z-index: 101;
+        }
+        .icon-sm { font-size: 0.85rem; }
+        .art-card:hover .delete-btn-card { opacity: 1; transform: scale(1); }
+        .delete-btn-card:hover { background: #d00000; transform: scale(1.1); }
+
+
+        /* --- 4. NAVBAR (Minimalist) --- */
+        .navbar {
+            position: fixed; top: 15px; left: 50%; transform: translateX(-50%);
+            width: 96%; max-width: 1300px;
+            background: rgba(255, 255, 255, 0.95);
+            -webkit-backdrop-filter: blur(25px); backdrop-filter: blur(25px);
+            border-radius: var(--radius-md); padding: 12px 30px;
+            display: grid; grid-template-columns: 1fr auto 1fr; align-items: center;
+            z-index: 200; box-shadow: 0 5px 20px rgba(0,0,0,0.03);
+            border: 1px solid #fff;
+        }
+
+        .nav-left { display: flex; flex-direction: column; text-align: left; }
+        .txt-brand-heading { font-size: 1.1rem; font-weight: 700; color: var(--maroon-accent); letter-spacing: 0.5px; }
+        .txt-brand-sub { font-size: 0.75rem; font-weight: 500; color: var(--text-sub); text-transform: uppercase; }
+        .txt-brand-address { font-size: 0.65rem; color: #888; margin-top: 1px; }
+
+        .nav-center { text-align: center; }
+        .txt-event-main { font-size: 1.1rem; font-weight: 700; color: #333; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 2px; }
+        .txt-event-date { font-size: 0.75rem; color: var(--text-sub); font-weight: 500; }
+
+        .nav-right { display: flex; justify-content: flex-end; position: relative;}
+
+        /* --- RESTORED PREVIOUS ICON BUTTON --- */
+        .user-menu-btn {
+            width: 45px; height: 45px; background: #fff;
+            border: 1px solid #eee; border-radius: 50%;
+            display: flex; align-items: center; justify-content: center;
+            cursor: pointer; transition: all 0.3s ease;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.1); color: var(--maroon-accent);
+        }
+        .user-menu-btn:hover { background: var(--maroon-accent); color: white; transform: scale(1.05); }
+        .user-icon-lg { font-size: 1.5rem; }
+
+
+        /* Menu Dropdown */
+        .menu-dropdown {
+            position: absolute; top: 60px; right: 0;
+            background: white; border-radius: 12px;
+            padding: 8px; width: 220px;
+            box-shadow: 0 15px 50px -10px rgba(0,0,0,0.15);
+            border: 1px solid rgba(0,0,0,0.04);
+            opacity: 0; pointer-events: none; transform: translateY(-8px);
+            transition: 0.25s cubic-bezier(0.2, 0.8, 0.2, 1);
+            display: flex; flex-direction: column; gap: 4px;
+        }
+        .menu-dropdown.active { opacity: 1; pointer-events: all; transform: translateY(0); }
+
+        .menu-item {
+            display: flex; align-items: center; padding: 12px 14px;
+            border-radius: 8px; cursor: pointer; transition: 0.2s;
+            font-size: 0.85rem; font-family: var(--font);
+        }
+        .menu-item.visitor-count { background: #fafafa; cursor: default; }
+        .menu-item.action { 
+            background: #222; 
+            color: white; justify-content: center; font-weight: 500; margin-top: 6px; 
+        }
+        .menu-item.action:hover { background: var(--maroon-accent); }
+
+        .menu-icon { margin-right: 8px; font-size: 1.1rem; }
+        .visit-label { font-size: 0.7rem; color: #888; }
+        .visit-val { font-size: 0.95rem; color: #333; font-weight: 700; margin-left: auto; }
+
+
+        /* --- 5. MINIMALIST UPLOAD CARD (Fixed Layout) --- */
+        
+        .modal-overlay {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(255, 255, 255, 0.4); 
+            -webkit-backdrop-filter: blur(25px); backdrop-filter: blur(25px);
+            z-index: 1000; display: flex; justify-content: center; align-items: center;
+            opacity: 0; pointer-events: none; transition: opacity 0.3s ease;
+        }
+        .modal-overlay.active { opacity: 1; pointer-events: all; }
+
+        .form-card {
+            background: var(--card-bg);
+            /* Reduced width */
+            width: 420px; 
+            max-width: 92%;
+            height: auto;
+            max-height: 85vh;
+            border-radius: var(--radius-lg); 
+            box-shadow: var(--shadow-card);
+            border: 1px solid rgba(255,255,255,0.8);
+            display: flex; flex-direction: column;
+            transform: translateY(20px) scale(0.98); 
+            transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+            position: relative;
+            /* FIXED: Ensures internal content respects border-radius at bottom */
+            overflow: hidden; 
+        }
+        .modal-overlay.active .form-card { transform: translateY(0) scale(1); }
+
+        /* HEADER */
+        .card-header { padding: 30px 30px 10px 30px; flex-shrink: 0; text-align: center; }
+
+        .form-title { 
+            color: var(--maroon-accent); margin: 0; 
+            font-weight: 700; font-size: 1.3rem; letter-spacing: -0.2px;
+        }
+        
+        /* BODY */
+        .card-body {
+            padding: 10px 30px;
+            overflow-y: auto; flex-grow: 1;     
+            scrollbar-width: thin; 
+            scrollbar-color: #ddd transparent;
+        }
+        .card-body::-webkit-scrollbar { width: 5px; }
+        .card-body::-webkit-scrollbar-thumb { background-color: #ccc; border-radius: 10px; }
+        .card-body::-webkit-scrollbar-track { background: transparent; }
+
+        .form-contents-display { display: contents; }
+
+        /* FOOTER */
+        .card-footer {
+            padding: 20px 30px 30px 30px;
+            flex-shrink: 0;
+            background: linear-gradient(to bottom, rgba(255,255,255,0), rgba(255,255,255,1) 20%);
+        }
+
+        .input-wrapper { margin-bottom: 20px; }
+        .input-label { display: block; font-size: 0.8rem; color: var(--text-sub); margin-bottom: 8px; font-weight: 600; }
+        
+        .clean-input-container { position: relative; width: 100%; }
+        
+        input[type="text"] { 
+            width: 100%; padding: 12px 14px; 
+            background: #f7f7f7; border: 1px solid transparent; 
+            border-radius: var(--radius-md); font-size: 0.9rem;
+            color: var(--text-main); font-family: var(--font);
+            transition: 0.2s; 
+        }
+        input[type="text"]:focus { 
+            background: #fff; border-color: var(--border-light); 
+            box-shadow: 0 4px 12px rgba(0,0,0,0.05); outline: none;
+        }
+
+        .btn-browse {
+            width: 100%; padding: 12px;
+            background: #fff; border: 1px solid #ddd;
+            color: #333; border-radius: var(--radius-md);
+            cursor: pointer; transition: 0.2s;
+            font-size: 0.9rem; font-weight: 600; font-family: var(--font);
+            display: flex; justify-content: center; align-items: center; gap: 8px;
+        }
+        .btn-browse:hover { border-color: #333; background: #fafafa; }
+
+        .preview-grid {
+            display: grid; grid-template-columns: repeat(3, 1fr); 
+            gap: 10px; margin-top: 15px; padding-bottom: 10px;
+        }
+
+        .thumb-box {
+            position: relative; width: 100%; aspect-ratio: 1;
+            background: #f0f0f0; border-radius: 8px; overflow: hidden;
+        }
+        .thumb-box img { width: 100%; height: 100%; object-fit: cover; }
+
+        .staging-empty {
+            grid-column: 1 / -1; padding: 20px; color: #aaa; text-align: center; font-size: 0.8rem;
+            border: 1px dashed #ddd; border-radius: 8px;
+        }
+
+        .btn-rot-mini {
+            position: absolute; bottom: 3px; right: 3px;
+            width: 22px; height: 22px; border-radius: 50%;
+            background: rgba(255,255,255,0.95); 
+            color: #222; border: none; cursor: pointer;
+            display: flex; align-items: center; justify-content: center;
+            font-size: 0.8rem; z-index: 5;
+        }
+        .btn-rot-mini:hover { color: var(--maroon-accent); transform: rotate(90deg); transition: 0.2s; }
+
+        .btn-primary-action { 
+            width: 100%; padding: 12px; 
+            background: #222; 
+            color: white; border: none; border-radius: 100px; 
+            cursor: pointer; transition: all 0.2s; 
+            font-weight: 600; font-size: 0.9rem; font-family: var(--font);
+        }
+        .btn-primary-action:hover { background: var(--maroon-accent); box-shadow: 0 4px 12px rgba(128,0,32,0.2); }
+
+        .close-circle {
+            position: absolute; top: 20px; right: 20px;
+            width: 28px; height: 28px; border-radius: 50%;
+            background: #f7f7f7; color: #555; border: none;
+            display: flex; align-items: center; justify-content: center;
+            font-size: 1.1rem; cursor: pointer; transition: 0.2s;
+        }
+        .close-circle:hover { color: #000; background: #e5e5e5; }
+        
+        .input-hidden { display: none; }
+        .custom-upload-icon { font-size: 1.5rem; margin-bottom: 6px; }
+
+        /* --- 6. LIGHTBOX --- */
+        .lightbox-wrapper { max-width: 95vw; max-height: 95vh; display: flex; flex-direction: column; align-items: center; }
+        .lightbox-img-frame { max-height: 80vh; max-width: 100%; box-shadow: 0 30px 90px rgba(0,0,0,0.25); border-radius: 5px; border: 15px solid #fff; transition: transform 0.3s; }
+        .art-details-float { background: #fff; color: var(--maroon-accent); padding: 10px 30px; border-radius: 30px; margin-top: -25px; z-index: 10; box-shadow: 0 10px 20px rgba(0,0,0,0.1); font-weight: 600; }
+        
+        .lightbox-close { top: 30px; right: 40px; color: #333; font-size: 2.5rem; position: absolute; cursor:pointer; background:none; border:none; z-index:2000; }
+        .empty-wall { position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); text-align: center; opacity: 0.4; }
+
+    </style>
+</head>
+<body>
+
+    <!-- NAVBAR -->
+    <nav class="navbar">
+        <div class="nav-left">
+            <div class="txt-brand-heading">KALA KENDRA</div>
+            <div class="txt-brand-sub">AN INSTITUTE OF ART</div>
+            <div class="txt-brand-address">CHHEND, ROURKELA, ODISHA - 769015</div>
+        </div>
+        <div class="nav-center">
+            <div class="txt-event-main">PAINTING EXHIBITION 2025</div>
+            <div class="txt-event-date">27-28th December 2025</div>
+        </div>
+        <div class="nav-right" id="navRightContainer">
+            <!-- REVERTED TO STAR ICON -->
+            <div class="user-menu-btn" role="button" aria-label="Admin Menu" onclick="toggleUserMenu()">
+                <i class="ri-user-star-line user-icon-lg"></i>
+            </div>
+            
+            <div class="menu-dropdown" id="userMenu">
+                <div class="menu-item visitor-count">
+                    <i class="ri-earth-line menu-icon"></i>
+                    <div><span class="visit-label">Visitors</span></div>
+                    <div class="visit-val">{{ visitors }}</div>
+                </div>
+                <div class="menu-item action" onclick="openModal('uploadModal')">
+                    <i class="ri-add-box-line menu-icon"></i> New Upload
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <!-- GALLERY VIEWPORT -->
+    <div class="gallery-viewport">
+        {% if photos %}
+            
+            <div class="scroll-track move-right">
+                {% for photo in photos[0::4] %}
+                    <div class="art-card" id="card-{{ photo[0] }}">
+                        <div class="card-view-trigger" role="button" tabindex="0" aria-label="View {{ photo[2] }}" 
+                             data-filename="{{ photo[1] }}" 
+                             data-name="{{ photo[2] }}" 
+                             data-orientation="{{ photo[3] }}"
+                             onclick="viewArt(this)">
+                             <img src="{{ url_for('static', filename='uploads/' + photo[1]) }}" class="rot-{{ photo[3] }}" alt="Art" loading="lazy">
+                        </div>
+                        <button class="delete-btn-card" onclick="removeArt(this)" data-id="{{ photo[0] }}" aria-label="Delete">
+                            <i class="ri-delete-bin-line icon-sm"></i>
+                        </button>
+                    </div>
+                {% endfor %}
+            </div>
+
+            <div class="scroll-track move-left">
+                {% for photo in photos[1::4] %}
+                    <div class="art-card" id="card-{{ photo[0] }}">
+                        <div class="card-view-trigger" role="button" tabindex="0" aria-label="View {{ photo[2] }}" data-filename="{{ photo[1] }}" data-name="{{ photo[2] }}" data-orientation="{{ photo[3] }}" onclick="viewArt(this)">
+                             <img src="{{ url_for('static', filename='uploads/' + photo[1]) }}" class="rot-{{ photo[3] }}" alt="Art" loading="lazy">
+                        </div>
+                        <button class="delete-btn-card" onclick="removeArt(this)" data-id="{{ photo[0] }}" aria-label="Delete">
+                            <i class="ri-delete-bin-line icon-sm"></i>
+                        </button>
+                    </div>
+                {% endfor %}
+            </div>
+
+            <div class="scroll-track move-right">
+                {% for photo in photos[2::4] %}
+                    <div class="art-card" id="card-{{ photo[0] }}">
+                        <div class="card-view-trigger" role="button" tabindex="0" aria-label="View {{ photo[2] }}" data-filename="{{ photo[1] }}" data-name="{{ photo[2] }}" data-orientation="{{ photo[3] }}" onclick="viewArt(this)">
+                             <img src="{{ url_for('static', filename='uploads/' + photo[1]) }}" class="rot-{{ photo[3] }}" alt="Art" loading="lazy">
+                        </div>
+                        <button class="delete-btn-card" onclick="removeArt(this)" data-id="{{ photo[0] }}" aria-label="Delete">
+                            <i class="ri-delete-bin-line icon-sm"></i>
+                        </button>
+                    </div>
+                {% endfor %}
+            </div>
+
+            <div class="scroll-track move-left">
+                {% for photo in photos[3::4] %}
+                    <div class="art-card" id="card-{{ photo[0] }}">
+                        <div class="card-view-trigger" role="button" tabindex="0" aria-label="View {{ photo[2] }}" data-filename="{{ photo[1] }}" data-name="{{ photo[2] }}" data-orientation="{{ photo[3] }}" onclick="viewArt(this)">
+                             <img src="{{ url_for('static', filename='uploads/' + photo[1]) }}" class="rot-{{ photo[3] }}" alt="Art" loading="lazy">
+                        </div>
+                        <button class="delete-btn-card" onclick="removeArt(this)" data-id="{{ photo[0] }}" aria-label="Delete">
+                            <i class="ri-delete-bin-line icon-sm"></i>
+                        </button>
+                    </div>
+                {% endfor %}
+            </div>
+
+        {% else %}
+            <div class="empty-wall">
+                <h1 class="empty-title">Your canvas is empty.</h1>
+                <p>Upload your first masterpiece.</p>
+            </div>
+        {% endif %}
+    </div>
+
+    <!-- UI: MINIMALIST UPLOAD CARD (Fixed Layout) -->
+    <div class="modal-overlay" id="uploadModal">
+        <div class="form-card">
+            
+            <button class="close-circle" onclick="closeModal('uploadModal')" aria-label="Close">
+                <i class="ri-close-line"></i>
+            </button>
+            
+            <!-- HEADER -->
+            <div class="card-header">
+                <div class="form-title">Upload Gallery</div>
+            </div>
+            
+            <!-- SCROLLABLE CONTENT -->
+            <form id="uploadForm" action="/upload" method="post" enctype="multipart/form-data" class="form-contents-display">
+                <div class="card-body">
+                    
+                    <div class="input-wrapper">
+                        <label class="input-label">Student Name</label>
+                        <div class="clean-input-container">
+                            <input type="text" name="photo_name" placeholder="Optional Name" autocomplete="off">
+                        </div>
+                    </div>
+
+                    <button type="button" class="btn-browse" onclick="document.getElementById('hiddenFile').click()">
+                        <i class="ri-folder-open-line"></i> Select Images
+                    </button>
+                    
+                    <input type="file" id="hiddenFile" name="file" class="input-hidden" multiple required onchange="handleFileSelect(this)">
+                    
+                    <!-- Scrolling List for Images -->
+                    <div id="previewContainer" class="preview-grid">
+                        <div class="staging-empty">
+                            <i class="ri-image-add-line custom-upload-icon"></i>
+                            <div>No images selected</div>
+                        </div>
+                    </div>
+                    
+                    <input type="hidden" name="orientations" id="orientationsInput">
+                </div>
+
+                <!-- FOOTER WITH PUBLISH BUTTON -->
+                <div class="card-footer">
+                    <button type="button" onclick="submitForm()" class="btn-primary-action">
+                        Publish to Gallery
+                    </button>
+                </div>
+            </form>
+            
+        </div>
+    </div>
+
+    <!-- LIGHTBOX -->
+    <div class="modal-overlay" id="lightbox" onclick="closeModal('lightbox')">
+        <button class="lightbox-close" onclick="closeModal('lightbox')" aria-label="Close">
+            <i class="ri-close-circle-fill"></i>
+        </button>
+        <div class="lightbox-wrapper" onclick="event.stopPropagation()">
+            <img src="" id="fullImg" class="lightbox-img-frame" alt="Artwork">
+            <div id="artLabel" class="art-details-float"></div> 
+        </div>
+    </div>
+
+    <script>
+        function toggleUserMenu() { document.getElementById('userMenu').classList.toggle('active'); }
+        document.addEventListener('click', (e) => { if (!document.getElementById('navRightContainer').contains(e.target)) document.getElementById('userMenu').classList.remove('active'); });
+
+        let selectedFiles = []; let rotationData = [];
+
+        function handleFileSelect(input) {
+            const container = document.getElementById('previewContainer');
+            container.innerHTML = "";
+            if (!input.files || input.files.length === 0) return;
+            selectedFiles = Array.from(input.files);
+            rotationData = new Array(selectedFiles.length).fill(0);
+            
+            selectedFiles.forEach((file, index) => {
+                const reader = new FileReader();
+                reader.onload = (e) => {
+                    const div = document.createElement('div');
+                    div.className = 'thumb-box';
+                    div.id = 'prev-' + index;
+                    div.innerHTML = `
+                        <img src="${e.target.result}" id="img-${index}" class="rot-0">
+                        <button type="button" class="btn-rot-mini" onclick="rotatePreview(${index})" title="Rotate">
+                            <i class="ri-refresh-line"></i>
+                        </button>`;
+                    container.appendChild(div);
+                };
+                reader.readAsDataURL(file);
+            });
+        }
+
+        function rotatePreview(index) {
+            rotationData[index] = (rotationData[index] + 90) % 360;
+            const img = document.getElementById('img-' + index);
+            img.className = `rot-${rotationData[index]}`;
+        }
+
+        function submitForm() {
+            document.getElementById('orientationsInput').value = rotationData.join(',');
+            if(selectedFiles.length > 0) document.getElementById('uploadForm').submit();
+            else alert("Please select images first.");
+        }
+
+        function openModal(id) { 
+            document.getElementById(id).classList.add('active'); 
+            document.getElementById('userMenu').classList.remove('active'); 
+        }
+        function closeModal(id) {
+            document.getElementById(id).classList.remove('active');
+            if(id === 'lightbox') setTimeout(() => { document.getElementById('fullImg').src = ""; }, 300);
+        }
+
+        function viewArt(element) {
+            const fname = element.getAttribute('data-filename');
+            const name = element.getAttribute('data-name');
+            const angle = element.getAttribute('data-orientation');
+            const img = document.getElementById('fullImg');
+            img.src = "/static/uploads/" + fname;
+            img.className = "lightbox-img-frame rot-" + angle;
+            const label = document.getElementById('artLabel');
+            label.textContent = name;
+            label.style.display = (name && name !== 'None') ? 'block' : 'none';
+            openModal('lightbox');
+        }
+
+        function removeArt(btn) {
+            const id = btn.getAttribute('data-id');
+            if(!confirm("Delete?")) return;
+            const card = document.getElementById('card-' + id);
+            card.style.transform = "scale(0) opacity(0)";
+            fetch('/delete/' + id, { method: 'POST' }).then(r => r.json()).then(data => { if(data.status === 'success') setTimeout(() => card.remove(), 400); });
+        }
+        document.addEventListener('keydown', (e) => { if(e.key === "Escape") { closeModal('uploadModal'); closeModal('lightbox'); } });
+    </script>
+</body>
+</html>
