@@ -652,17 +652,29 @@
         }
 
         function viewArt(element) {
-            const fname = element.getAttribute('data-filename');
+            const imageUrl = element.getAttribute('data-image-url');
             const name = element.getAttribute('data-name');
-            const angle = element.getAttribute('data-orientation');
             const img = document.getElementById('fullImg');
-            img.src = "/static/uploads/" + fname;
-            img.className = "lightbox-img-frame rot-" + angle;
+            img.src = imageUrl;
+            img.className = "lightbox-img-frame";  // remove rotation if not used
             const label = document.getElementById('artLabel');
             label.textContent = name;
             label.style.display = (name && name !== 'None') ? 'block' : 'none';
             openModal('lightbox');
         }
+
+        // function viewArt(element) {
+        //     const fname = element.getAttribute('data-image-url');
+        //     const name = element.getAttribute('data-name');
+        //     const angle = element.getAttribute('data-orientation');
+        //     const img = document.getElementById('fullImg');
+        //     img.src = "/static/uploads/" + fname;
+        //     img.className = "lightbox-img-frame rot-" + angle;
+        //     const label = document.getElementById('artLabel');
+        //     label.textContent = name;
+        //     label.style.display = (name && name !== 'None') ? 'block' : 'none';
+        //     openModal('lightbox');
+        // }
 
         function removeArt(btn) {
             const id = btn.getAttribute('data-id');
