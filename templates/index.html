@@ -1,3 +1,7 @@
+Gmail	Kalyani Jha <kalyanijha20.02.2008@gmail.com>
+index.html
+Vishma Pasayat <vishmapasayat003@gmail.com>	Sat, Dec 27, 2025 at 10:58 AM
+To: kalyanijha20.02.2008@gmail.com
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -33,38 +37,73 @@
             font-family: var(--font);
             background: linear-gradient(135deg, var(--gradient-start) 0%, var(--gradient-end) 100%);
             color: var(--text-main);
-            height: 100vh;
+            /* Enable Vertical Scrolling for the whole page */
+            min-height: 100vh;
             width: 100vw;
-            overflow: hidden;
+            overflow-y: auto; 
+            overflow-x: hidden;
         }
 
-        /* --- 2. MARQUEE LAYOUT --- */
+        /* --- 2. SCROLL LAYOUT --- */
         .gallery-viewport {
-            width: 100vw; height: 100vh;
-            display: flex; flex-direction: column; justify-content: center;
-            overflow: hidden; gap: 20px; padding-top: 120px; 
+            width: 100vw; 
+            min-height: 100vh;
+            height: auto;
+            display: flex; flex-direction: column; justify-content: flex-start;
+            gap: 20px; 
+            padding-top: 180px; 
+            padding-bottom: 50px;
         }
 
-        .scroll-track { display: flex; width: max-content; gap: 20px; }
+        /* Container for the row of images */
+        .scroll-track { 
+            display: flex; 
+            width: 100%; 
+            gap: 15px; 
+            /* Enable Native Horizontal Scrolling (Manual) */
+            overflow-x: auto; 
+            padding-left: 20px; 
+            padding-right: 20px;
+            padding-bottom: 5px; 
+            
+            /* HIDE SCROLLBARS COMPLETELY */
+            -ms-overflow-style: none;  /* IE and Edge */
+            scrollbar-width: none;  /* Firefox */
+        }
 
-        .move-right { animation: scrollRight 180s linear infinite; }
-        .move-left { animation: scrollLeft 180s linear infinite; }
+        /* Hide Scrollbar for Chrome/Safari/Opera */
+        .scroll-track::-webkit-scrollbar { 
+            display: none; 
+        }
 
-        @keyframes scrollLeft { 0% { transform: translateX(0); } 100% { transform: translateX(-50%); } }
-        @keyframes scrollRight { 0% { transform: translateX(-50%); } 100% { transform: translateX(0); } }
-        
-        .scroll-track:hover { animation-play-state: paused; }
+        /* Disable CSS Animation so JS can handle both Auto & Manual */
+        .move-right { animation: none; }
+        .move-left { animation: none; }
 
-        /* --- 3. ART CARD (Minimalist Frame) --- */
+        .scroll-track:hover {
+            cursor: grab;
+        }
+        .scroll-track:active {
+            cursor: grabbing;
+        }
+
+        /* --- 3. ART CARD (Minimize Size) --- */
         .art-card {
-            position: relative; background: #fff; padding: 10px;
+            position: relative; background: #fff; padding: 8px;
             border-radius: 4px; box-shadow: 0 4px 20px rgba(0,0,0,0.06);
-            height: 180px; min-width: 130px; 
+            /* Height: 140px, Width: ~110px */
+            height: 140px; 
+            min-width: 110px; 
             cursor: pointer; transition: all 0.4s cubic-bezier(0.2, 0.8, 0.2, 1); 
             flex-shrink: 0; border: 1px solid #f0f0f0;
         }
 
-        .card-view-trigger { width: 100%; height: 100%; display: block; overflow: hidden; }
+        .card-view-trigger { 
+            width: 100%; height: 100%; display: block; overflow: hidden; 
+            -webkit-touch-callout: none;
+            -webkit-user-select: none; 
+            user-select: none;
+        }
 
         .art-card img {
             width: 100%; height: 100%; object-fit: cover;
@@ -114,7 +153,6 @@
 
         .nav-right { display: flex; justify-content: flex-end; position: relative;}
 
-        /* --- RESTORED PREVIOUS ICON BUTTON --- */
         .user-menu-btn {
             width: 45px; height: 45px; background: #fff;
             border: 1px solid #eee; border-radius: 50%;
@@ -169,7 +207,6 @@
 
         .form-card {
             background: var(--card-bg);
-            /* Reduced width */
             width: 420px; 
             max-width: 92%;
             height: auto;
@@ -181,7 +218,6 @@
             transform: translateY(20px) scale(0.98); 
             transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
             position: relative;
-            /* FIXED: Ensures internal content respects border-radius at bottom */
             overflow: hidden; 
         }
         .modal-overlay.active .form-card { transform: translateY(0) scale(1); }
@@ -296,6 +332,65 @@
         .lightbox-close { top: 30px; right: 40px; color: #333; font-size: 2.5rem; position: absolute; cursor:pointer; background:none; border:none; z-index:2000; }
         .empty-wall { position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); text-align: center; opacity: 0.4; }
 
+
+        /* --- 7. MOBILE RESPONSIVE TWEAKS --- */
+        @media screen and (max-width: 768px) {
+            .navbar {
+                display: grid;
+                grid-template-columns: 1fr auto;
+                grid-template-rows: auto auto;
+                gap: 15px 0;
+                padding: 15px 20px;
+                top: 10px;
+                width: 94%;
+            }
+            
+            .nav-left { grid-column: 1; grid-row: 1; }
+            
+            .nav-right { grid-column: 2; grid-row: 1; align-self: center; justify-self: end; }
+            .user-menu-btn { width: 40px; height: 40px; }
+
+            .nav-center { 
+                grid-column: 1 / -1; 
+                grid-row: 2; 
+                text-align: left;
+                padding-top: 12px;
+                border-top: 1px solid #f2f2f2;
+                margin-top: 5px;
+            }
+            
+            .txt-brand-heading { font-size: 0.95rem; }
+            .txt-brand-sub { font-size: 0.65rem; }
+            .txt-brand-address { font-size: 0.6rem; max-width: 100%; white-space: normal; line-height: 1.3; margin-top: 3px; }
+            
+            .txt-event-main { font-size: 0.9rem; }
+            .txt-event-date { font-size: 0.7rem; }
+
+            .gallery-viewport { 
+                padding-top: 230px; /* Adjusted for stacked navbar */
+                gap: 15px; 
+            }
+            
+            .art-card { height: 120px; min-width: 90px; padding: 6px; }
+            
+            .delete-btn-card { 
+                opacity: 0; pointer-events: none;
+                top: -8px; right: -8px;
+                transition: opacity 0.2s, transform 0.2s;
+            }
+            
+            .delete-btn-card.show-mobile {
+                opacity: 1; 
+                pointer-events: auto;
+                transform: scale(0.9);
+            }
+
+            .menu-dropdown { top: 50px; right: -5px; width: 190px; }
+            
+            .lightbox-img-frame { border-width: 5px; }
+            .lightbox-close { top: 10px; right: 10px; }
+        }
+
     </style>
 </head>
 <body>
@@ -312,7 +407,6 @@
             <div class="txt-event-date">27-28th December 2025</div>
         </div>
         <div class="nav-right" id="navRightContainer">
-            <!-- REVERTED TO STAR ICON -->
             <div class="user-menu-btn" role="button" aria-label="Admin Menu" onclick="toggleUserMenu()">
                 <i class="ri-user-star-line user-icon-lg"></i>
             </div>
@@ -331,37 +425,57 @@
     </nav>
 
     <!-- GALLERY VIEWPORT -->
-   <div class="gallery-viewport">
+<!-- GALLERY VIEWPORT -->
+<div class="gallery-viewport">
     {% if photos %}
-        
+
+        <!-- Move Right -->
         <div class="scroll-track move-right">
             {% for photo in photos[0::4] %}
                 <div class="art-card" id="card-{{ photo[0] }}">
-                    <div class="card-view-trigger" role="button" tabindex="0" aria-label="View {{ photo[2] }}" 
-                         data-filename="{{ photo[1] }}" 
-                         data-name="{{ photo[2] }}" 
-                         data-orientation="{{ photo[3] }}"
-                         onclick="viewArt(this)">
-                         <img src="{{ photo[1] }}" class="rot-{{ photo[3] }}" alt="Art" loading="lazy">
+                    <div class="card-view-trigger" role="button" tabindex="0"
+                         aria-label="View {{ photo[2] }}"
+                         data-image-url="{{ photo[1] }}"
+                         data-name="{{ photo[2] }}"
+                         onclick="viewArt(this)"
+                         ontouchstart="handleTouchStart(this)"
+                         ontouchend="handleTouchEnd(event)"
+                         ontouchmove="handleTouchCancel()">
+
+                        <!-- ✅ Cloudinary image -->
+                        <img src="{{ photo[1] }}" class="rot-0" alt="Art" loading="lazy">
                     </div>
-                    <button class="delete-btn-card" onclick="removeArt(this)" data-id="{{ photo[0] }}" aria-label="Delete">
+
+                    <button class="delete-btn-card"
+                            onclick="removeArt(this)"
+                            data-id="{{ photo[0] }}"
+                            aria-label="Delete">
                         <i class="ri-delete-bin-line icon-sm"></i>
                     </button>
                 </div>
             {% endfor %}
         </div>
 
+        <!-- Move Left -->
         <div class="scroll-track move-left">
             {% for photo in photos[1::4] %}
                 <div class="art-card" id="card-{{ photo[0] }}">
-                    <div class="card-view-trigger" role="button" tabindex="0" aria-label="View {{ photo[2] }}"
-                         data-filename="{{ photo[1] }}"
+                    <div class="card-view-trigger" role="button" tabindex="0"
+                         aria-label="View {{ photo[2] }}"
+                         data-image-url="{{ photo[1] }}"
                          data-name="{{ photo[2] }}"
-                         data-orientation="{{ photo[3] }}"
-                         onclick="viewArt(this)">
-                         <img src="{{ photo[1] }}" class="rot-{{ photo[3] }}" alt="Art" loading="lazy">
+                         onclick="viewArt(this)"
+                         ontouchstart="handleTouchStart(this)"
+                         ontouchend="handleTouchEnd(event)"
+                         ontouchmove="handleTouchCancel()">
+
+                        <img src="{{ photo[1] }}" class="rot-0" alt="Art" loading="lazy">
                     </div>
-                    <button class="delete-btn-card" onclick="removeArt(this)" data-id="{{ photo[0] }}" aria-label="Delete">
+
+                    <button class="delete-btn-card"
+                            onclick="removeArt(this)"
+                            data-id="{{ photo[0] }}"
+                            aria-label="Delete">
                         <i class="ri-delete-bin-line icon-sm"></i>
                     </button>
                 </div>
@@ -371,14 +485,22 @@
         <div class="scroll-track move-right">
             {% for photo in photos[2::4] %}
                 <div class="art-card" id="card-{{ photo[0] }}">
-                    <div class="card-view-trigger" role="button" tabindex="0" aria-label="View {{ photo[2] }}"
-                         data-filename="{{ photo[1] }}"
+                    <div class="card-view-trigger" role="button" tabindex="0"
+                         aria-label="View {{ photo[2] }}"
+                         data-image-url="{{ photo[1] }}"
                          data-name="{{ photo[2] }}"
-                         data-orientation="{{ photo[3] }}"
-                         onclick="viewArt(this)">
-                         <img src="{{ photo[1] }}" class="rot-{{ photo[3] }}" alt="Art" loading="lazy">
+                         onclick="viewArt(this)"
+                         ontouchstart="handleTouchStart(this)"
+                         ontouchend="handleTouchEnd(event)"
+                         ontouchmove="handleTouchCancel()">
+
+                        <img src="{{ photo[1] }}" class="rot-0" alt="Art" loading="lazy">
                     </div>
-                    <button class="delete-btn-card" onclick="removeArt(this)" data-id="{{ photo[0] }}" aria-label="Delete">
+
+                    <button class="delete-btn-card"
+                            onclick="removeArt(this)"
+                            data-id="{{ photo[0] }}"
+                            aria-label="Delete">
                         <i class="ri-delete-bin-line icon-sm"></i>
                     </button>
                 </div>
@@ -388,14 +510,22 @@
         <div class="scroll-track move-left">
             {% for photo in photos[3::4] %}
                 <div class="art-card" id="card-{{ photo[0] }}">
-                    <div class="card-view-trigger" role="button" tabindex="0" aria-label="View {{ photo[2] }}"
-                         data-filename="{{ photo[1] }}"
+                    <div class="card-view-trigger" role="button" tabindex="0"
+                         aria-label="View {{ photo[2] }}"
+                         data-image-url="{{ photo[1] }}"
                          data-name="{{ photo[2] }}"
-                         data-orientation="{{ photo[3] }}"
-                         onclick="viewArt(this)">
-                         <img src="{{ photo[1] }}" class="rot-{{ photo[3] }}" alt="Art" loading="lazy">
+                         onclick="viewArt(this)"
+                         ontouchstart="handleTouchStart(this)"
+                         ontouchend="handleTouchEnd(event)"
+                         ontouchmove="handleTouchCancel()">
+
+                        <img src="{{ photo[1] }}" class="rot-0" alt="Art" loading="lazy">
                     </div>
-                    <button class="delete-btn-card" onclick="removeArt(this)" data-id="{{ photo[0] }}" aria-label="Delete">
+
+                    <button class="delete-btn-card"
+                            onclick="removeArt(this)"
+                            data-id="{{ photo[0] }}"
+                            aria-label="Delete">
                         <i class="ri-delete-bin-line icon-sm"></i>
                     </button>
                 </div>
@@ -409,6 +539,7 @@
         </div>
     {% endif %}
 </div>
+
 
     <!-- UI: MINIMALIST UPLOAD CARD (Fixed Layout) -->
     <div class="modal-overlay" id="uploadModal">
@@ -544,7 +675,114 @@
             card.style.transform = "scale(0) opacity(0)";
             fetch('/delete/' + id, { method: 'POST' }).then(r => r.json()).then(data => { if(data.status === 'success') setTimeout(() => card.remove(), 400); });
         }
+        
+        // --- LONG PRESS TO SHOW DELETE BUTTON (Mobile) ---
+        var longPressTimer;
+        var isLongPressActive = false;
+
+        function handleTouchStart(el) {
+            isLongPressActive = false;
+            longPressTimer = setTimeout(function() {
+                isLongPressActive = true;
+                var btn = el.parentElement.querySelector('.delete-btn-card');
+                if(btn) btn.classList.toggle('show-mobile'); 
+                if(navigator.vibrate) navigator.vibrate(40); 
+            }, 600); 
+        }
+
+        function handleTouchCancel() {
+            clearTimeout(longPressTimer);
+        }
+
+        function handleTouchEnd(e) {
+            clearTimeout(longPressTimer);
+            if(isLongPressActive) {
+                e.preventDefault(); 
+                e.stopPropagation(); 
+            }
+        }
+
         document.addEventListener('keydown', (e) => { if(e.key === "Escape") { closeModal('uploadModal'); closeModal('lightbox'); } });
+
+        /* --- UPDATED: INFINITE SCROLL LOOP (WITH MANUAL SCROLL SUPPORT) --- */
+        (function() {
+            const tracks = document.querySelectorAll('.scroll-track');
+            const scrollStates = [];
+
+            // 1. Prepare Content for Infinite Scroll
+            tracks.forEach(track => {
+                // Duplicate content twice to ensure there is always content to scroll into
+                // Simple duplication string-based to keep click events handled via delegates in simple setup, 
+                // but for delete buttons etc, it's safer to not rely on IDs or be aware that ID duplication happens (CSS/JS selection might need care if using getElementById, but current script uses passed elements 'this').
+                const originalContent = track.innerHTML;
+                track.innerHTML = originalContent + originalContent;
+
+                const isRight = track.classList.contains('move-right');
+                
+                // Set initial position
+                if (isRight) {
+                    // For visually "left to right", we scroll content BACKWARD.
+                    // Start roughly in middle (the junction point) so we can scroll left immediately.
+                    track.scrollLeft = track.scrollWidth / 2;
+                } else {
+                    track.scrollLeft = 0;
+                }
+
+                scrollStates.push({
+                    el: track,
+                    direction: isRight ? -1 : 1, // -1 = Move Content Left (Vis Right), 1 = Move Content Right (Vis Left) ... WAIT. 
+                                                // move-left means (Left visual). This requires ScrollLeft++. 
+                                                // move-right means (Right visual). This requires ScrollLeft--.
+                    paused: false
+                });
+
+                // Attach Events
+                const pause = () => { scrollStates[scrollStates.length-1].paused = true; }; // Fix closure issue below by not using push return
+                // Actually, map logic below:
+            });
+
+            // Re-attach listeners properly
+            scrollStates.forEach(state => {
+                 const pause = () => state.paused = true;
+                 const resume = () => state.paused = false;
+
+                 state.el.addEventListener('mouseenter', pause);
+                 state.el.addEventListener('mouseleave', resume);
+                 state.el.addEventListener('touchstart', pause, {passive: true});
+                 state.el.addEventListener('touchend', () => setTimeout(resume, 1200));
+            });
+
+
+            function loop() {
+                scrollStates.forEach(state => {
+                    if(state.paused) return;
+
+                    const track = state.el;
+                    const halfWidth = track.scrollWidth / 2;
+                    
+                    // Update Position
+                    track.scrollLeft += (state.direction * 0.7); // Speed
+
+                    // Check boundaries for infinite loop reset
+                    if (state.direction === 1) { 
+                        // Visual: Right-to-Left (Normal Read) -> Scroll Increasing
+                        if (track.scrollLeft >= halfWidth) {
+                            // Seamless jump back to start
+                            track.scrollLeft -= halfWidth;
+                        }
+                    } else {
+                        // Visual: Left-to-Right -> Scroll Decreasing
+                        if (track.scrollLeft <= 0) {
+                            // Seamless jump to "middle" clone
+                            track.scrollLeft += halfWidth;
+                        }
+                    }
+                });
+                requestAnimationFrame(loop);
+            }
+            requestAnimationFrame(loop);
+
+        })();
     </script>
 </body>
 </html>
